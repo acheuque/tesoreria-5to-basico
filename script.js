@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbxQ9bxkWrcH58DMwrM3jWX_6Efm9UX7CcFEL0QqigFb4OhI6wfJ67fleQ9wHchcqGeT/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxpoB1Rbs3qyTX43HYqOcBnxIewTnD4jIn3M8PJPhknh_r_8Lj9-mN5mn4lLPFnErkB6w/exec';
 
 const formatCurrency = (amount) => {
     // Format as Chilean Pesos
@@ -41,7 +41,7 @@ function createCuotasTable(cuotas) {
 }
 
 function createEgresosTable(egresos) {
-    // Filter egresos to only include ingresos adicionales
+    // Keep backwards compatibility in case old negative rows still exist.
     const egresosFiltered = egresos.filter(egreso => egreso.monto >= 0);
     
     if(!egresosFiltered.length) {
@@ -80,11 +80,8 @@ function createEgresosTable(egresos) {
     return table;
 }
 
-function createIngresosAdicionalesTable(egresos) {
-    // Filter egresos to only include ingresos adicionales
-    const egresosFiltered = egresos.filter(egreso => egreso.monto < 0);
-    
-    if(!egresosFiltered.length) {
+function createIngresosAdicionalesTable(donaciones) {
+    if(!donaciones || !donaciones.length) {
         return;
     }
 
@@ -104,14 +101,14 @@ function createIngresosAdicionalesTable(egresos) {
     
     // Create body
     const tbody = document.createElement('tbody');
-    egresosFiltered.forEach(egreso => {
-        const fecha = new Date(egreso.fecha);
+    donaciones.forEach(donacion => {
+        const fecha = new Date(donacion.fecha);
         const formattedFecha = fecha.toLocaleDateString('es-CL');
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="fecha">${formattedFecha}</td>
-            <td class="monto">${formatCurrency(egreso.monto * -1)}</td>
-            <td class="glosa">${egreso.glosa}</td>
+            <td class="monto">${formatCurrency(donacion.monto)}</td>
+            <td class="glosa">${donacion.glosa}</td>
         `;
         tbody.appendChild(row);
     });
@@ -150,15 +147,23 @@ async function loadData() {
 
             // Create and add egresos table
             const egresosTable = createEgresosTable(data.egresos); 
-            const ingresosAdicionalesTable = createIngresosAdicionalesTable(data.egresos);
+            const ingresosAdicionalesTable = createIngresosAdicionalesTable(data.donaciones);
             const egresosContainer = document.getElementById('egresos-container');
             const egresosLoadingElement = document.getElementById('egresos-loading');
             const ingresosAdicionalesContainer = document.getElementById('ingresos-adicionales-container');
             const ingresosAdicionalesLoadingElement = document.getElementById('ingresos-adicionales-loading');
             egresosLoadingElement.remove();
-            egresosContainer.appendChild(egresosTable);
+            if (egresosTable) {
+                egresosContainer.appendChild(egresosTable);
+            } else {
+                egresosContainer.innerHTML += '<div class="amount">Sin egresos registrados</div>';
+            }
             ingresosAdicionalesLoadingElement.remove();
-            ingresosAdicionalesContainer.appendChild(ingresosAdicionalesTable);
+            if (ingresosAdicionalesTable) {
+                ingresosAdicionalesContainer.appendChild(ingresosAdicionalesTable);
+            } else {
+                ingresosAdicionalesContainer.innerHTML += '<div class="amount">Sin donaciones registradas</div>';
+            }
         }
     } catch (error) {
         console.error('Error loading data:', error);

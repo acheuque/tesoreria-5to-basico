@@ -3,6 +3,7 @@ function doGet() {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var mainSheet = spreadsheet.getSheets()[0];  // Get first sheet
   var egresosSheet = spreadsheet.getSheetByName('Egresos'); // Get Egresos sheet
+  var donacionesSheet = spreadsheet.getSheetByName('Donaciones'); // Get Donaciones sheet
   
   // Get the total ingresos/egresos data
   var totalsRange = mainSheet.getRange(1, 1, 2, 2);
@@ -15,6 +16,13 @@ function doGet() {
   // Get the egresos data
   var egresosRange = egresosSheet.getRange("A2:C100"); // Get all rows from A2 to C100
   var egresosValues = egresosRange.getValues().filter(row => row[0] !== ''); // Filter out empty rows
+
+  // Get the donaciones data (if sheet exists)
+  var donacionesValues = [];
+  if (donacionesSheet) {
+    var donacionesRange = donacionesSheet.getRange("A2:C100"); // Get all rows from A2 to C100
+    donacionesValues = donacionesRange.getValues().filter(row => row[0] !== ''); // Filter out empty rows
+  }
   
   // Create the JSON structure
   var jsonData = {
@@ -24,6 +32,11 @@ function doGet() {
     },
     cuotas: [],
     egresos: egresosValues.map(row => ({
+      fecha: row[0],
+      monto: row[1],
+      glosa: row[2]
+    })),
+    donaciones: donacionesValues.map(row => ({
       fecha: row[0],
       monto: row[1],
       glosa: row[2]
