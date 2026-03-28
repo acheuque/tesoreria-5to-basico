@@ -18,12 +18,9 @@ function doGet() {
   var egresosValues = egresosRange.getValues().filter(row => row[0] !== ''); // Filter out empty rows
 
   // Get the donaciones data (if sheet exists)
-  var donacionesValues = [];
-  if (donacionesSheet) {
-    var donacionesRange = donacionesSheet.getRange("A2:C100"); // Get all rows from A2 to C100
-    donacionesValues = donacionesRange.getValues().filter(row => row[0] !== ''); // Filter out empty rows
-  }
-  
+  var donacionesRange = donacionesSheet.getRange("A2:C100"); // Get all rows from A2 to C100
+  donacionesValues = donacionesRange.getValues().filter(row => row[0] !== ''); // Filter out empty rows
+
   // Create the JSON structure
   var jsonData = {
     totals: {
