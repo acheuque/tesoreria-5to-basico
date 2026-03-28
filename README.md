@@ -1,4 +1,4 @@
-# Tesorería 4to Básico
+# Tesorería 5to Básico
 
 Una aplicación web simple para visualizar el balance financiero del curso, con una interfaz amigable y animaciones interactivas.
 
