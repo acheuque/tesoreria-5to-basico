@@ -7,6 +7,20 @@ const ANIO_ACADEMICO = 2026;
 
 let codigosList = [];
 
+/** Lee `?codigo=` o `?c=` (enlace corto). Ej.: página.html?codigo=2PHG */
+function getCodigoFromUrl() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('codigo') || params.get('c');
+        if (raw == null || String(raw).trim() === '') {
+            return null;
+        }
+        return decodeURIComponent(String(raw).trim());
+    } catch {
+        return null;
+    }
+}
+
 /**
  * Cuotas que ya debieron pagarse entre marzo y la fecha de referencia (inclusive),
  * dentro del año marzo–diciembre de `anioAcademico` (marzo = mes 1 … diciembre = 10).
@@ -236,8 +250,19 @@ async function loadData() {
             balanceElement.style.color = balance >= 0 ? '#2e7d32' : '#c62828';
 
             codigosList = Array.isArray(data.codigos) ? data.codigos : [];
-            document.getElementById('codigo-search-input').disabled = false;
+            const codigoInput = document.getElementById('codigo-search-input');
+            codigoInput.disabled = false;
             document.getElementById('codigo-search-btn').disabled = false;
+
+            const codigoDesdeUrl = getCodigoFromUrl();
+            if (codigoDesdeUrl) {
+                codigoInput.value = codigoDesdeUrl;
+                buscarCodigo();
+                document.getElementById('codigos-search-container')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                });
+            }
 
             // Create and add cuotas table
             const cuotasTable = createCuotasTable(data.cuotas);
