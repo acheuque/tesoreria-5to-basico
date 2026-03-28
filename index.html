@@ -38,10 +38,10 @@
                 font-size: 16px !important;
             }
 
-            .financial-summary, .cuotas-box, .egresos-box, .ingresos-adicionales-box {
+            .financial-summary, .cuotas-box, .egresos-box, .ingresos-adicionales-box, .codigos-search-box {
                 padding: 15px !important;
             }
-            .cuotas-table, .egresos-table, .ingresos-adicionales-table {
+            .cuotas-table, .egresos-table, .ingresos-adicionales-table, .codigos-result-table {
                 font-size: 14px;
             }
 
@@ -50,7 +50,9 @@
             .egresos-table th,
             .egresos-table td,
             .ingresos-adicionales-table th,
-            .ingresos-adicionales-table td {
+            .ingresos-adicionales-table td,
+            .codigos-result-table th,
+            .codigos-result-table td {
                 padding: 8px !important;
             }
 
@@ -71,6 +73,104 @@
             .piggy-bank {
                 font-size: 36px !important;
             }
+        }
+
+        .codigos-search-box {
+            background-color: white;
+            border: 3px solid var(--cambridge-blue);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 56, 118, 0.2);
+            margin-top: 20px;
+            animation: float 6s ease-in-out infinite;
+            animation-delay: 0.15s;
+        }
+
+        .codigos-search-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .codigos-search-input {
+            flex: 1;
+            min-width: 160px;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 16px;
+            border: 2px solid var(--cambridge-blue);
+            border-radius: 12px;
+            box-sizing: border-box;
+        }
+
+        .codigos-search-input:disabled {
+            opacity: 0.6;
+        }
+
+        .codigos-search-btn {
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: var(--cambridge-blue);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 56, 118, 0.25);
+        }
+
+        .codigos-search-btn:hover:not(:disabled) {
+            filter: brightness(1.08);
+        }
+
+        .codigos-search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .codigos-result-wrap {
+            margin-top: 20px;
+            min-height: 1em;
+        }
+
+        .codigos-result-table {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 56, 118, 0.1);
+        }
+
+        .codigos-result-table th,
+        .codigos-result-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .codigos-result-table th {
+            background-color: var(--cambridge-blue);
+            color: white;
+            font-weight: bold;
+        }
+
+        .codigos-result-table tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        .codigos-result-msg {
+            color: var(--cambridge-blue);
+            font-size: 18px;
+            margin-top: 8px;
+        }
+
+        .codigos-result-msg.error {
+            color: var(--cambridge-red);
         }
 
         .financial-summary {
@@ -363,7 +463,8 @@
 
             .cuotas-box,
             .egresos-box,
-            .ingresos-adicionales-box {
+            .ingresos-adicionales-box,
+            .codigos-search-box {
                 padding: 15px !important;
                 overflow: hidden;
             }
@@ -424,6 +525,18 @@
     
     <div class="piggy-bank">
         🐷
+    </div>
+
+    <div id="codigos-search-container" class="codigos-search-box">
+        <div class="label">
+            <span class="emoji">🔎</span>
+            Buscador de códigos
+        </div>
+        <div class="codigos-search-row">
+            <input type="text" id="codigo-search-input" class="codigos-search-input" placeholder="Escribe un código..." autocomplete="off" disabled aria-label="Código a buscar">
+            <button type="button" id="codigo-search-btn" class="codigos-search-btn" disabled>Buscar</button>
+        </div>
+        <div id="codigos-result" class="codigos-result-wrap" aria-live="polite"></div>
     </div>
 
     <div class="financial-summary">

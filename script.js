@@ -1,5 +1,51 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbxpoB1Rbs3qyTX43HYqOcBnxIewTnD4jIn3M8PJPhknh_r_8Lj9-mN5mn4lLPFnErkB6w/exec';
 
+let codigosList = [];
+
+function normalizeCodigo(str) {
+    return String(str).replace(/\s/g, '').toUpperCase();
+}
+
+function buscarCodigo() {
+    const input = document.getElementById('codigo-search-input');
+    const resultEl = document.getElementById('codigos-result');
+    resultEl.innerHTML = '';
+    const q = normalizeCodigo(input.value);
+    if (!q) {
+        const p = document.createElement('p');
+        p.className = 'codigos-result-msg error';
+        p.textContent = 'Ingresa un código para buscar.';
+        resultEl.appendChild(p);
+        return;
+    }
+    const matches = codigosList.filter((c) => normalizeCodigo(c.codigo) === q);
+    if (!matches.length) {
+        const p = document.createElement('p');
+        p.className = 'codigos-result-msg error';
+        p.textContent = 'No se encontró el código.';
+        resultEl.appendChild(p);
+        return;
+    }
+    const table = document.createElement('table');
+    table.className = 'codigos-result-table';
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Código</th><th>Cuotas</th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    matches.forEach((m) => {
+        const tr = document.createElement('tr');
+        const tdCodigo = document.createElement('td');
+        tdCodigo.textContent = m.codigo;
+        const tdCuotas = document.createElement('td');
+        tdCuotas.textContent = String(m.cuotas);
+        tr.appendChild(tdCodigo);
+        tr.appendChild(tdCuotas);
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    resultEl.appendChild(table);
+}
+
 const formatCurrency = (amount) => {
     // Format as Chilean Pesos
     return new Intl.NumberFormat('es-CL', { 
@@ -138,6 +184,10 @@ async function loadData() {
             const balanceElement = document.getElementById('balance');
             balanceElement.style.color = balance >= 0 ? '#2e7d32' : '#c62828';
 
+            codigosList = Array.isArray(data.codigos) ? data.codigos : [];
+            document.getElementById('codigo-search-input').disabled = false;
+            document.getElementById('codigo-search-btn').disabled = false;
+
             // Create and add cuotas table
             const cuotasTable = createCuotasTable(data.cuotas);
             const cuotasContainer = document.getElementById('cuotas-container');
@@ -173,7 +223,18 @@ async function loadData() {
         document.getElementById('cuotas-loading').textContent = 'Error al cargar datos';
         document.getElementById('egresos-loading').textContent = 'Error al cargar datos';
         document.getElementById('ingresos-adicionales-loading').textContent = 'Error al cargar datos';
+        const codigosResult = document.getElementById('codigos-result');
+        if (codigosResult) {
+            codigosResult.innerHTML = '<p class="codigos-result-msg error">No se pudieron cargar los códigos.</p>';
+        }
     }
 }
+
+document.getElementById('codigo-search-btn').addEventListener('click', buscarCodigo);
+document.getElementById('codigo-search-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        buscarCodigo();
+    }
+});
 
 loadData();
