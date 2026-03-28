@@ -1,9 +1,39 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbxpoB1Rbs3qyTX43HYqOcBnxIewTnD4jIn3M8PJPhknh_r_8Lj9-mN5mn4lLPFnErkB6w/exec';
 
+const CUOTAS_TOTAL_ANUAL = 10;
+
+/** Año del período marzo–diciembre usado para calcular cuotas esperadas y retrasadas. */
+const ANIO_ACADEMICO = 2026;
+
 let codigosList = [];
+
+/**
+ * Cuotas que ya debieron pagarse entre marzo y la fecha de referencia (inclusive),
+ * dentro del año marzo–diciembre de `anioAcademico` (marzo = mes 1 … diciembre = 10).
+ */
+function cuotasEsperadasHastaFecha(anioAcademico, fecha) {
+    const y = fecha.getFullYear();
+    const m = fecha.getMonth();
+    const dia = fecha.getDate();
+    const ref = new Date(y, m, dia);
+    const inicio = new Date(anioAcademico, 2, 1);
+    const fin = new Date(anioAcademico, 11, 31);
+    if (ref < inicio) {
+        return 0;
+    }
+    if (ref > fin) {
+        return CUOTAS_TOTAL_ANUAL;
+    }
+    return m - 2 + 1;
+}
 
 function normalizeCodigo(str) {
     return String(str).replace(/\s/g, '').toUpperCase();
+}
+
+function parseCuotasPagadas(val) {
+    const n = Number(val);
+    return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
 }
 
 function buscarCodigo() {
@@ -26,20 +56,41 @@ function buscarCodigo() {
         resultEl.appendChild(p);
         return;
     }
+    const hoy = new Date();
+    const esperadas = cuotasEsperadasHastaFecha(ANIO_ACADEMICO, hoy);
+
     const table = document.createElement('table');
     table.className = 'codigos-result-table';
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th>Código</th><th>Cuotas</th></tr>';
+    thead.innerHTML = `
+        <tr>
+            <th>Código</th>
+            <th>Cuotas pagadas</th>
+            <th>Cuotas retrasadas</th>
+            <th>Total cuotas</th>
+        </tr>
+    `;
     table.appendChild(thead);
     const tbody = document.createElement('tbody');
     matches.forEach((m) => {
+        const pagadas = parseCuotasPagadas(m.cuotas);
+        const retrasadas = Math.max(0, esperadas - pagadas);
         const tr = document.createElement('tr');
         const tdCodigo = document.createElement('td');
         tdCodigo.textContent = m.codigo;
-        const tdCuotas = document.createElement('td');
-        tdCuotas.textContent = String(m.cuotas);
+        const tdPagadas = document.createElement('td');
+        tdPagadas.textContent = String(pagadas);
+        const tdRetrasadas = document.createElement('td');
+        tdRetrasadas.textContent = String(retrasadas);
+        if (retrasadas > 0) {
+            tdRetrasadas.classList.add('codigos-retrasadas');
+        }
+        const tdTotal = document.createElement('td');
+        tdTotal.textContent = String(CUOTAS_TOTAL_ANUAL);
         tr.appendChild(tdCodigo);
-        tr.appendChild(tdCuotas);
+        tr.appendChild(tdPagadas);
+        tr.appendChild(tdRetrasadas);
+        tr.appendChild(tdTotal);
         tbody.appendChild(tr);
     });
     table.appendChild(tbody);
