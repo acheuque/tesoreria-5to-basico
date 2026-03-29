@@ -5,7 +5,28 @@ const CUOTAS_TOTAL_ANUAL = 10;
 /** Año del período marzo–diciembre usado para calcular cuotas esperadas y retrasadas. */
 const ANIO_ACADEMICO = 2026;
 
+/**
+ * Códigos easter egg: misma normalización que la búsqueda (sin espacios, mayúsculas).
+ * Sustituye las URLs por tus imágenes.
+ */
+const CODIGOS_EASTER_EGG = [
+    { codigo: 'pikachu', imagenUrl: 'https://cheuque.cl/tesoreria-images/pikachu.png' },
+    { codigo: 'pika', imagenUrl: 'https://cheuque.cl/tesoreria-images/pikachu.png' },
+    { codigo: 'chispa', imagenUrl: 'https://cheuque.cl/tesoreria-images/pikachu.png' },
+    { codigo: 'charmander', imagenUrl: 'https://cheuque.cl/tesoreria-images/charmander.png' },
+    { codigo: 'char', imagenUrl: 'https://cheuque.cl/tesoreria-images/charmander.png' },
+    { codigo: 'hot', imagenUrl: 'https://cheuque.cl/tesoreria-images/charmander.png' },
+    { codigo: 'squirtle', imagenUrl: 'https://cheuque.cl/tesoreria-images/squirtle.png' },
+    { codigo: 'squir', imagenUrl: 'https://cheuque.cl/tesoreria-images/squirtle.png' },
+    { codigo: 'ola', imagenUrl: 'https://cheuque.cl/tesoreria-images/squirtle.png' },
+    { codigo: 'agua', imagenUrl: 'https://cheuque.cl/tesoreria-images/squirtle.png' },
+    { codigo: 'bulbasaur', imagenUrl: 'https://cheuque.cl/tesoreria-images/bulbasaur.png' },
+    { codigo: 'saur', imagenUrl: 'https://cheuque.cl/tesoreria-images/bulbasaur.png' },
+    { codigo: 'planti', imagenUrl: 'https://cheuque.cl/tesoreria-images/bulbasaur.png' },
+];
+
 let codigosList = [];
+let easterEggRunId = 0;
 
 /** Lee `?codigo=` o `?c=` (enlace corto). Ej.: página.html?codigo=2PHG */
 function getCodigoFromUrl() {
@@ -50,6 +71,58 @@ function parseCuotasPagadas(val) {
     return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
 }
 
+function findEasterEggByCodigo(qNormalized) {
+    const found = CODIGOS_EASTER_EGG.find((egg) => normalizeCodigo(egg.codigo) === qNormalized);
+    return found ? found.imagenUrl : null;
+}
+
+function mostrarEasterEgg(imageUrl) {
+    easterEggRunId += 1;
+    const runId = easterEggRunId;
+    const prev = document.getElementById('easter-egg-layer');
+    if (prev) {
+        prev.remove();
+    }
+
+    const layer = document.createElement('div');
+    layer.id = 'easter-egg-layer';
+    layer.className = 'easter-egg-layer';
+    layer.setAttribute('aria-hidden', 'true');
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = '';
+    img.className = 'easter-egg-img';
+    img.decoding = 'async';
+    layer.appendChild(img);
+    document.body.appendChild(layer);
+
+    const slideMs = 400;
+    const visibleMs = 5000;
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (runId !== easterEggRunId) {
+                return;
+            }
+            layer.classList.add('easter-egg-layer--in');
+        });
+    });
+
+    window.setTimeout(() => {
+        if (runId !== easterEggRunId) {
+            return;
+        }
+        layer.classList.remove('easter-egg-layer--in');
+        layer.classList.add('easter-egg-layer--out');
+        window.setTimeout(() => {
+            if (runId !== easterEggRunId) {
+                return;
+            }
+            layer.remove();
+        }, slideMs);
+    }, slideMs + visibleMs);
+}
+
 function buscarCodigo() {
     const input = document.getElementById('codigo-search-input');
     const resultEl = document.getElementById('codigos-result');
@@ -62,6 +135,13 @@ function buscarCodigo() {
         resultEl.appendChild(p);
         return;
     }
+
+    const eggUrl = findEasterEggByCodigo(q);
+    if (eggUrl) {
+        mostrarEasterEgg(eggUrl);
+        return;
+    }
+
     const matches = codigosList.filter((c) => normalizeCodigo(c.codigo) === q);
     if (!matches.length) {
         const p = document.createElement('p');

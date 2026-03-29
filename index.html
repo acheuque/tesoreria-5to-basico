@@ -178,6 +178,36 @@
             color: var(--cambridge-red);
         }
 
+        .easter-egg-layer {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            z-index: 10000;
+            pointer-events: none;
+            transform: translateX(calc(100% + 48px));
+            transition: transform 0.4s ease-out;
+        }
+
+        .easter-egg-layer--in {
+            transform: translateX(0);
+        }
+
+        .easter-egg-layer--out {
+            transform: translateX(calc(100% + 48px));
+            transition: transform 0.4s ease-in;
+        }
+
+        .easter-egg-img {
+            display: block;
+            max-width: min(512px, calc(100vw - 32px));
+            max-height: min(512px, calc(100vh - 32px));
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            /* box-shadow: 0 8px 28px rgba(0, 56, 118, 0.35); */
+        }
+
         .financial-summary {
             background-color: white;
             border: 3px solid var(--cambridge-blue);
@@ -594,6 +624,12 @@
         <div id="ingresos-adicionales-loading" class="amount">Cargando...</div>
     </div>
 
+    <div>
+        <img src="https://cheuque.cl/tesoreria-images/pikachu.png" alt="Pikachu" width="1" height="1">
+        <img src="https://cheuque.cl/tesoreria-images/charmander.png" alt="Charmander" width="1" height="1">
+        <img src="https://cheuque.cl/tesoreria-images/squirtle.png" alt="Squirtle" width="1" height="1">
+        <img src="https://cheuque.cl/tesoreria-images/bulbasaur.png" alt="Bulbasaur" width="1" height="1">
+    </div>
     <script src="script.js"></script>
     <script>
         function createMoney() {
